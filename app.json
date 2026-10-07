@@ -11,6 +11,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.sparklesuite.euchre",
       "adaptiveIcon": {
         "backgroundColor": "#0b5d3b",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -24,10 +25,25 @@
     },
     "plugins": [
       "expo-router",
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "backgroundColor": "#0b5d3b"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cca6ae4c-b3f8-4f6b-9c2d-a813f7ef2014"
+      }
+    },
+    "owner": "discussionforall"
   }
 }
