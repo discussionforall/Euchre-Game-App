@@ -23,6 +23,7 @@ GOLD = (242, 193, 78)
 CARD_FACE = (255, 253, 247)
 CARD_BORDER = (201, 195, 179)
 RED = (200, 38, 47)
+BLACK = (27, 27, 27)
 
 SS = 4  # draw everything 4x larger, then shrink, for smooth edges
 
@@ -47,8 +48,23 @@ def diamond_points(cx, cy, size):
     return [(cx, cy - h), (cx + w, cy), (cx, cy + h), (cx - w, cy)]
 
 
-def suit_points(suit, cx, cy, size):
-    return heart_points(cx, cy, size) if suit == "hearts" else diamond_points(cx, cy, size)
+def draw_suit(draw, suit, cx, cy, size, fill):
+    """Draws one suit symbol about `size` wide, centred on (cx, cy)."""
+    if suit == "hearts":
+        draw.polygon(heart_points(cx, cy, size), fill=fill)
+    elif suit == "diamonds":
+        draw.polygon(diamond_points(cx, cy, size), fill=fill)
+    elif suit == "spades":
+        # An upside-down heart with a little flared stem.
+        pts = heart_points(cx, cy, size * 0.9)
+        draw.polygon([(x, 2 * cy - y - size * 0.12) for x, y in pts], fill=fill)
+        draw.polygon([(cx, cy), (cx - size * 0.2, cy + size * 0.5), (cx + size * 0.2, cy + size * 0.5)], fill=fill)
+    else:  # clubs: three round leaves and a stem
+        r = size * 0.22
+        for dx, dy in ((0, -0.22), (-0.24, 0.08), (0.24, 0.08)):
+            x, y = cx + dx * size, cy + dy * size
+            draw.ellipse([x - r, y - r, x + r, y + r], fill=fill)
+        draw.polygon([(cx, cy), (cx - size * 0.2, cy + size * 0.5), (cx + size * 0.2, cy + size * 0.5)], fill=fill)
 
 
 def radial_gradient(size, inner, outer):
@@ -75,7 +91,8 @@ def draw_card(w, h, suit, mono=False):
     card = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(card)
     radius = int(w * 0.09)
-    ink = (0, 0, 0, 0) if mono else RED + (255,)
+    colour = RED if suit in ("hearts", "diamonds") else BLACK
+    ink = (0, 0, 0, 0) if mono else colour + (255,)
 
     if mono:
         d.rounded_rectangle([0, 0, w - 1, h - 1], radius, fill=(255, 255, 255, 255))
@@ -88,7 +105,7 @@ def draw_card(w, h, suit, mono=False):
     corner = Image.new("RGBA", (int(w * 0.24), int(w * 0.42)), (0, 0, 0, 0))
     cd = ImageDraw.Draw(corner)
     cd.text((corner.width / 2, 0), "J", font=index_font, fill=(255, 0, 0, 255), anchor="mt")
-    cd.polygon(suit_points(suit, corner.width / 2, corner.height * 0.74, w * 0.15), fill=(255, 0, 0, 255))
+    draw_suit(cd, suit, corner.width / 2, corner.height * 0.74, w * 0.15, (255, 0, 0, 255))
     mask = corner.split()[3]
     for img, pos in ((mask, (int(w * 0.04), int(w * 0.05))),
                      (mask.rotate(180), (w - corner.width - int(w * 0.04), h - corner.height - int(w * 0.05)))):
@@ -98,7 +115,7 @@ def draw_card(w, h, suit, mono=False):
     centre = Image.new("L", (w, h), 0)
     md = ImageDraw.Draw(centre)
     md.text((w / 2, h * 0.40), "J", font=ImageFont.truetype(FONT, int(w * 0.54)), fill=255, anchor="mm")
-    md.polygon(suit_points(suit, w / 2, h * 0.75, w * 0.28), fill=255)
+    draw_suit(md, suit, w / 2, h * 0.75, w * 0.28, 255)
     card.paste(Image.new("RGBA", (w, h), ink), (0, 0), centre)
     return card
 

@@ -12,6 +12,12 @@
     },
     "android": {
       "package": "com.sparklesuite.euchre",
+      "blockedPermissions": [
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#0b5d3b",
         "foregroundImage": "./assets/android-icon-foreground.png",
